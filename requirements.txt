@@ -1,0 +1,8 @@
+autopep8==1.4.4
+Django==2.2
+djangorestframework==3.9.2
+psycopg2-binary==2.8.2
+pycodestyle==2.5.0
+PyJWT==1.7.1
+pytz==2019.1
+sqlparse==0.3.0
