@@ -25,14 +25,14 @@ class JWTAuthentication(authentication.BaseAuthentication):
         prefix = auth_header[0].decode('utf-8')
         token = auth_header[1].decode('utf-8')
 
-        if prefix.lower() != authentication_header_prefix:
+        if prefix.lower() != auth_header_prefix:
             return None
 
-        return _authenticate_credentials(request, token)
+        return self._authenticate_credentials(request, token)
 
     def _authenticate_credentials(self, request, token):
         try:
-            payload = jwt.decode(token, os.environ['APP_SECRET_KEY'])
+            payload = jwt.decode(token, os.environ['APP_SECRET'])
         except:
             raise exceptions.AuthenticationFailed('Authentication failed!')
 
@@ -45,5 +45,5 @@ class JWTAuthentication(authentication.BaseAuthentication):
             raise exceptions.AuthenticationFailed('This user is deactivated!')
 
         data = (user, token)
-        
+
         return data
