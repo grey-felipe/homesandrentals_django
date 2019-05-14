@@ -1,15 +1,19 @@
 from django.urls import path, include
 from .views import (AddPropertyView, UpdateProperty,
-                    DeletePropertyView, GetAllPropertyView, GetPropertyById, GetPropertyByLocation, GetPropertyByTitle)
+                    DeletePropertyView, GetAllPropertyView,
+                    GetPropertyById, GetPropertyByLocation,
+                    GetPropertyByTitle, GetAllSingleUserProperty)
 
 urlpatterns = [
     path('add/', AddPropertyView.as_view(), name='add_property'),
     path('all/', GetAllPropertyView.as_view(), name='get_all_property'),
     path('all/<int:id>/', GetPropertyById.as_view(), name='get_property_by_id'),
-    path('all/<str:location>/location', GetPropertyByLocation.as_view(),
+    path('all/<str:location>/location/', GetPropertyByLocation.as_view(),
          name='get_property_by_location'),
-    path('all/<str:title>/title', GetPropertyByTitle.as_view(),
+    path('all/<str:title>/title/', GetPropertyByTitle.as_view(),
          name='get_property_by_title'),
-    path('update/<int:id>', UpdateProperty.as_view(), name='update_property'),
-    path('delete/<int:id>', DeletePropertyView.as_view(), name='delete_property'),
+    path('all/<int:id>/user/', GetAllSingleUserProperty.as_view(),
+         name='get_single_users_property'),
+    path('update/<int:id>/', UpdateProperty.as_view(), name='update_property'),
+    path('delete/<int:id>/', DeletePropertyView.as_view(), name='delete_property'),
 ]

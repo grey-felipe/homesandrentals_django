@@ -15,14 +15,22 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.views import APIView
 import datetime
 
+from ..users.backends import JWTAuthentication
+from ..users.models import User
+from ...utils.utils import (decode_token,)
+
 
 class AddPropertyView(CreateAPIView):
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated,)
     renderer_classes = (PropertyRenderer,)
     serializer_class = AddPropertySerializer
 
     def post(self, request):
+        jwt = JWTAuthentication()
+        user = jwt.authenticate(self.request)
+        token_data = decode_token(user[1])
         request_data = request.data.get('property', {})
+        request_data['username'] = token_data['id']
         serializer = self.serializer_class(data=request_data)
         serializer.is_valid(raise_exception=True)
         serializer.save(slug=serializer.get_slug(request_data.get('title')))
@@ -30,7 +38,7 @@ class AddPropertyView(CreateAPIView):
 
 
 class UpdateProperty(UpdateAPIView):
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated,)
     renderer_classes = (PropertyRenderer,)
     serializer_class = UpdatePropertySerializer
     look_url_kwarg = 'id'
@@ -52,7 +60,7 @@ class UpdateProperty(UpdateAPIView):
 
 
 class DeletePropertyView(DestroyAPIView):
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated,)
     look_url_kwarg = 'id'
 
     def delete(self, request, *args, **kwargs):
@@ -114,5 +122,19 @@ class GetPropertyByTitle(ListAPIView):
         title = self.kwargs.get(self.look_url_kwarg)
         property_list = Property.objects.filter(
             title__icontains=title).order_by('id')
+        if property_list is not None:
+            return property_list
+
+
+class GetAllSingleUserProperty(ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = GetPropertySerializer
+    renderer_classes = (PropertyListRenderer,)
+    look_url_kwarg = 'id'
+
+    def get_queryset(self):
+        userid = self.kwargs.get(self.look_url_kwarg)
+        property_list = Property.objects.filter(
+            username_id=userid).order_by('id')
         if property_list is not None:
             return property_list
