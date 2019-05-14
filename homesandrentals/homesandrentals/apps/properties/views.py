@@ -48,8 +48,15 @@ class UpdateProperty(UpdateAPIView):
         return Property.objects.filter(id=id)
 
     def put(self, request, *args, **kwargs):
+        jwt = JWTAuthentication()
+        user = jwt.authenticate(self.request)
+        token_data = decode_token(user[1])
+
         request_data = request.data.get('property', {})
         queryset = self.get_queryset()
+
+        if not token_data['id'] == queryset[0].username_id:
+            return Response({'message': 'You are not authorised to edit this item.'}, status=status.HTTP_400_BAD_REQUEST)
 
         if not queryset:
             raise exceptions.APIException('Item not found.')
@@ -64,8 +71,16 @@ class DeletePropertyView(DestroyAPIView):
     look_url_kwarg = 'id'
 
     def delete(self, request, *args, **kwargs):
+        jwt = JWTAuthentication()
+        user = jwt.authenticate(self.request)
+        token_data = decode_token(user[1])
+
         id = self.kwargs.get(self.look_url_kwarg)
         property = Property.objects.filter(id=id)
+
+        if not token_data['id'] == property[0].username_id:
+            return Response({'message': 'You are not authorised to delete this item.'}, status=status.HTTP_400_BAD_REQUEST)
+
         if property:
             property.delete()
             return Response({'message': 'Property was deleted.'}, status=status.HTTP_200_OK)
